@@ -1,4 +1,5 @@
-obj/crypto.o: src/crypto.c src/crypto.h \
+obj/ReplicaCompression.o: src/ReplicaCompression.c \
+  src/ReplicaCompression.h src/PoRep.h src/Ledger.h src/crypto.h \
   /opt/homebrew/opt/openssl@3/include/openssl/sha.h \
   /opt/homebrew/opt/openssl@3/include/openssl/macros.h \
   /opt/homebrew/opt/openssl@3/include/openssl/opensslconf.h \
@@ -50,7 +51,10 @@ obj/crypto.o: src/crypto.c src/crypto.h \
   /opt/homebrew/opt/openssl@3/include/openssl/conftypes.h \
   /opt/homebrew/opt/openssl@3/include/openssl/pemerr.h \
   /opt/homebrew/opt/openssl@3/include/openssl/rand.h \
-  /opt/homebrew/opt/openssl@3/include/openssl/randerr.h src/Ledger.h
+  /opt/homebrew/opt/openssl@3/include/openssl/randerr.h
+src/ReplicaCompression.h:
+src/PoRep.h:
+src/Ledger.h:
 src/crypto.h:
 /opt/homebrew/opt/openssl@3/include/openssl/sha.h:
 /opt/homebrew/opt/openssl@3/include/openssl/macros.h:
@@ -104,4 +108,3 @@ src/crypto.h:
 /opt/homebrew/opt/openssl@3/include/openssl/pemerr.h:
 /opt/homebrew/opt/openssl@3/include/openssl/rand.h:
 /opt/homebrew/opt/openssl@3/include/openssl/randerr.h:
-src/Ledger.h:

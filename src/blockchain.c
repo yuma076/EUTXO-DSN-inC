@@ -3,9 +3,10 @@
 #include "PoRep.h"
 #include "AS.h"
 #include "Transaction.h"
+#include "ReplicaCompression.h"
 
-#define MODE_NORMAL
-// #define MODE_BURNT_0 // MODE_BURNT_0/1 -> 0 is the case of delete replica, 1 is the case of invalid interval.
+//#define MODE_BURNT (0) // MODE_BURNT (0/1) -> 0 is the case of delete replica, 1 is the case of invalid interval.
+#define MODE_REPLICA_COMPRESSION
 
 bool partial_contractTx(Tx *tx, const char* sender_pub, const char *sender_priv, const char *receiver_pub, int payment);
 bool complete_contractTx(Tx *tx, const char* sender_pub, const char *sender_priv, int collateral);
@@ -27,6 +28,7 @@ bool partial_contractTx(Tx *tx, const char* sender_pub, const char *sender_priv,
     char input_datum[] = "Holding";
     // outputs
     char output_datum[] = "Holding";
+
     makeTx(sender_pub, validator, redeemer, input_datum, payment, receiver_pub, output_datum, tx);
 
     free(redeemer);
@@ -48,7 +50,9 @@ bool complete_contractTx(Tx *tx, const char* sender_pub, const char *sender_priv
     char input_datum[] = "Holding";
     // outputs
     char output_datum[] = "Contract";
+    
     makeValIn_from_now(tx, 5);
+
     makeTx(sender_pub, validator, redeemer, input_datum, collateral, "./pem/validator_address.hex", output_datum, tx);
 
     free(redeemer);
@@ -84,8 +88,13 @@ bool testTx(int id, char** replica, int N, int collateral, char **tauD, unsigned
     }
     int challenge[CHALLENGE_NUM] = {};
     PoRep_Poll(N, challenge);
-#ifdef MODE_NORMAL
+    
+#if !defined (MODE_BURNT) || (MODE_BURNT != 0)
+#if defined (MODE_REPLICA_COMPRESSION)
+    PoRep_Prove_malicious(replica, N, id, challenge, proof);
+#else
     PoRep_Prove(replica, N, id, challenge, proof);
+#endif
 #endif
 
     int tauD_num = Tree_num_fromleaf(N);
@@ -104,7 +113,8 @@ bool testTx(int id, char** replica, int N, int collateral, char **tauD, unsigned
     memset(challenges, 0, CHALLENGE_NUM * (N + 1) + 1);
     
     int i;
-#ifdef MODE_NORMAL
+
+#if !defined (MODE_BURNT) || (MODE_BURNT != 0)
     // (str*)proof[]={"s1","s2",...,"sn"} -> (str)proofs="s1:s2:...:sn"
     for(i = 0; i < CHALLENGE_NUM - 1; i++) {
         strcat(proofs, proof[i]);
@@ -112,6 +122,9 @@ bool testTx(int id, char** replica, int N, int collateral, char **tauD, unsigned
     }
     strcat(proofs, proof[i]);
 #endif
+
+    //for(int i=0;i<CHALLENGE_NUM;i++) printf("p%d:%s\n",i+1,proof[i]);
+
     // (str*)tauD[]={"o1","o2",...,"on"} -> (str)tauDs="o1:o2:...:on"
     for(i = 0; i < tauD_num - 1; i++) {
         strcat(tauDs, tauD[i]);
@@ -146,11 +159,10 @@ bool testTx(int id, char** replica, int N, int collateral, char **tauD, unsigned
     char input_datum[] = "Contract";
     // Outputs
     char output_datum[] = "Contract";
-#ifndef MODE_BURNT_1
-    makeValIn_from_now(&tx, 5);
-#endif
-#ifdef MODE_BURNT_1
+#if (MODE_BURNT == 1)
     makeValIn_from_now(&tx, 0);
+#else
+    makeValIn_from_now(&tx, 5);
 #endif
     makeTx("./pem/validator_address.hex", validator, redeemer, input_datum, collateral, "./pem/validator_address.hex", output_datum, &tx);
     free(redeemer);
@@ -247,7 +259,8 @@ int main(int argc, char *argv[]) {
     if(!payTx(NULL, NULL, "./pem/User_pub.pem", 1000)) return 1;
     // User has 700, Provider has 300.
     if(!payTx("./pem/User_pub.pem", "./pem/User_priv.pem", "./pem/Provider_pub.pem", 300)) return 1;
-
+    printf("Setup: success\n");
+// ----- Setup ------ //
 // ----- Preprocessing phase ----- //
     // User has the original data.
     if (argc < 2) {
@@ -292,6 +305,7 @@ int main(int argc, char *argv[]) {
     // User generates the tau_D including the commitment and openings from the padding encoded data D.
     char **tauD;
     int tauD_num = merkle_root(padding_Uencdata, pct_len, &tauD);
+    printf("[U]Preprocessing phase: success\n");
 // ----- Preprocessing phase ----- //
 
 // ----- Delegation phase ----- //
@@ -299,6 +313,7 @@ int main(int argc, char *argv[]) {
     Tx contract_tx = {0};
     if(!partial_contractTx(&contract_tx, "./pem/User_pub.pem", "./pem/User_priv.pem", "./pem/Provider_pub.pem", 200)) return 1;
 
+        printf("    [U] -- (D,tauD,partial contractTx) --> [P]\n");
         // User passes (D, tau_D, partial contractTx) to Provider.
         // User only saves tauD.
 
@@ -320,24 +335,29 @@ int main(int argc, char *argv[]) {
         }
         memset(replica[i], 0, VDE_CT_LEN(BIN_HASH_SIZE) + 1);
     }
+    // Only one replica was made.
     int N = PoRep_Replicate(0, tauD, padding_Uencdata, pct_len, Provider_key, Provider_iv, replica);
+    printf("[P]Replicate the data: success\n");
     // Provider completes the partial contractTx sent by User by depositing 100 as collateral.
     const int collateral = 100;
     //--- contract Tx embeds the contract metadata (i.e., identifier, period, and transaction validity intervals) and delegation outcomes (i.e., data tag and replication auxiliary). ---
     if(!complete_contractTx(&contract_tx, "./pem/Provider_pub.pem", "./pem/Provider_priv.pem", collateral)) return 1;
+    printf("[U][P]Delegation phase: success\n");
 // ----- Delegation phase ----- //
 
-#ifndef MODE_BURNT_0
+#if !defined (MODE_BURNT) || (MODE_BURNT != 0)
 // ----- Preservation phase ----- //
     // Provider makes a publicly verifiable proof showing the storage of R and submits Tx embedding it n times.
     int porep_times = 3;
     for(int i = 0; i < porep_times; i++) {
         if(!testTx(0, replica, N, collateral, tauD, Provider_key, Provider_iv)) return 1;
+        int c = 0;
+        for(int j = 0; j < N; j++) if(replica[j] != NULL) c += VDE_CT_LEN(BIN_HASH_SIZE);
+        printf("[P]Replica size (%d):%d B\n", i, c);
     }
+    printf("[P]Preservation phase: success\n");
 // ----- Preservation phase ----- //
-#endif
-
-#ifdef MODE_BURNT_0
+#else
 // ----- Preservation phase (Case where collateral is Burnt due to proof failure) ----- //
     // Provider makes a publicly verifiable proof showing the storage of R and submits Tx embedding it n times.
     int porep_times = 3;
@@ -361,6 +381,7 @@ int main(int argc, char *argv[]) {
         if(!testTx(0, replica, N, collateral, tauD, Provider_key, Provider_iv)) return 1;
 
     }
+    printf("[P]Preservation phase: success (BURNT)\n");
 // ----- Preservation phase (Case where collateral is Burnt due to proof failure) ----- //
 #endif
 
@@ -372,7 +393,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     memset(Pext_padding_Uencdata, 0 , pct_len + 1);
+#if !defined (MODE_BURNT) || (MODE_BURNT != 0)
+#if defined (MODE_REPLICA_COMPRESSION)
+    PoRep_Extract_malicious(0, tauD, replica, N, Provider_key, Provider_iv, Pext_padding_Uencdata);
+#else
     PoRep_Extract(0, tauD, replica, N, Provider_key, Provider_iv, Pext_padding_Uencdata);
+#endif
+#endif
     // Provider encodes D(extracted_encdata) into D'(Penc_padding_Uencdata).
     char *Penc_padding_Uencdata = (char*)malloc(VDE_CT_LEN(pct_len + 1));  // processed free
     if (!Penc_padding_Uencdata) {
@@ -382,7 +409,6 @@ int main(int argc, char *argv[]) {
     memset(Penc_padding_Uencdata, 0, VDE_CT_LEN(pct_len + 1));
     unsigned char Extract_key[AES_KEY_SIZE], Extract_iv[AES_BLOCK_SIZE];
     generate_key_iv(Extract_key, Extract_iv);
-
     VDE_encode((const unsigned char*)Pext_padding_Uencdata, pct_len, Extract_key, Extract_iv, Penc_padding_Uencdata, 0);
     unsigned char Extract_keys[AES_KEY_SIZE + AES_BLOCK_SIZE] = {};
     memcpy(Extract_keys, Extract_key, AES_KEY_SIZE);
@@ -402,6 +428,7 @@ int main(int argc, char *argv[]) {
     EC_POINT *Y = EC_POINT_new(group); // processed free
     EC_POINT_mul(group, Y, K, NULL, NULL, ctx);
 
+        printf("    [P] -- (G,D',Y) --> [U]\n");
         // Provider passes (G, D', Y) to User.
 
     // User generates Schnorr keys for the Adaptor Signature. (AS_pubkey = g^AS_privkey)
@@ -418,6 +445,7 @@ int main(int argc, char *argv[]) {
     Tx finalTx = {0};
     partial_finalTx(&finalTx, sig_s_hat, sig_r);
 
+        printf("    [U] -- (partial finalTx,AS pubkey) --> [P]\n");
         // User passes (partial finalTx,AS_pubkey) to Provider.
 
     // Provider verifies the pre-signature sigma_hat in the partial finalTx and issue the complete finalTx with full signature.
@@ -445,6 +473,7 @@ int main(int argc, char *argv[]) {
         printf("Extracted data is different from original data.\n");
         return 1;
     }
+    printf("[U]Extract the data in AS: success\n");
     // User decodes extracted data by own key.
     char *Uext_Uencdata = (char*)realloc(Uext_padding_Uencdata, ct_len + 1); // processed free
     if(Uext_Uencdata == NULL) return 1;
@@ -456,6 +485,7 @@ int main(int argc, char *argv[]) {
     }
     memset(Uext_data, 0, data_len + 1);
     VDE_decode(Uext_Uencdata, User_key, User_iv, (unsigned char*)Uext_data);
+    printf("[U][P]Retrieval phase: success\n");
 // ----- Retrieval phase ----- //
 
     // output extracted data

@@ -4,7 +4,7 @@
 int PoRep_Replicate(int id, char** tauD, char* data, int data_len, const unsigned char *key, const unsigned char *iv, char** replica) {
     int N = data_len / HEX_HASH_SIZE;
     int tauD_num = Tree_num_fromleaf(N);
-    double delay = 0; // set delay
+    double delay = 0.1; // set delay
     printf("Wait %.1lf seconds to make Replication...\n", N * delay);
     for(int i = 0; i < N; i++){
         printf("\r%.0lf seconds elapsed...", (i + 1) * delay);
@@ -20,20 +20,9 @@ int PoRep_Replicate(int id, char** tauD, char* data, int data_len, const unsigne
             sscanf(data + (i * HEX_HASH_SIZE) + (j * 2), "%2x", &bin_data[j]);
             result[j] = bin_data[j] ^ hash_ids[j];
         }
-
-        /*printf("res%d:",i);
-        for(int j=0;j<BIN_HASH_SIZE;j++) printf("%02x", result[j]);
-        printf("\n");
-        printf("bdata%d:",i);
-        for(int j=0;j<BIN_HASH_SIZE;j++) printf("%02x", bin_data[j]);
-        printf("\n");
-        printf("hids%d:",i);
-        for(int j=0;j<BIN_HASH_SIZE;j++) printf("%02x", hash_ids[j]);
-        printf("\n");*/
-
         VDE_encode(result, BIN_HASH_SIZE, key, iv, replica[i], delay);
     }
-    printf("\n[P]replicate the data: success\n");
+    printf("\n");
     return N;
 }
 
@@ -146,24 +135,6 @@ bool PoRep_Verify(int id, char **tauD, int *challenge, int N, char** proof, cons
         d[HEX_HASH_SIZE] = '\0';
 
         b &= PoRep_Verify_Oracle(d, challenge[i], tauD, N);
-        /*if(b == false) {
-            printf("d%d:", challenge[i]);
-            for(int j=0;j<HEX_HASH_SIZE;j++) printf("%02x", d[j]);
-            printf("\n");
-            printf("bd%d:", challenge[i]);
-            for(int j=0;j<BIN_HASH_SIZE;j++) printf("%02x", bin_d[j]);
-            printf("\n");
-            printf("dec%d:", challenge[i]);
-            for(int j=0;j<BIN_HASH_SIZE;j++) printf("%02x", decrypted[j]);
-            printf("\n");
-            printf("hids%d:", challenge[i]);
-            for(int j=0;j<BIN_HASH_SIZE;j++) printf("%02x", hash_ids[j]);
-            printf("\n");
-            printf("N:%d\n",N);
-            printf("CH:%d\n", challenge[i]);
-            printf("P:%s\n",proof[i]);
-            DEBUG;
-        }*/
     }
     return b;
 }
@@ -190,7 +161,7 @@ void PoRep_Extract(int id, char **tauD, char **replica, int N, const unsigned ch
     char **exttauD;
     int exttauD_num = merkle_root(data, strlen(data), &exttauD); // processed free
     if(strcmp(tauD[tauD_num - 1], exttauD[exttauD_num - 1]) == 0) {
-        printf("[P]extract the data in PoRep: success\n");
+        printf("[P]Extract the data in PoRep: success\n");
     } else {
         printf("Fail to extract the data in PoRep.");
         for(int i = 0; i < exttauD_num; i++) free(exttauD[i]);

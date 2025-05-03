@@ -51,7 +51,8 @@ obj/blockchain.o: src/blockchain.c src/crypto.h \
   /opt/homebrew/opt/openssl@3/include/openssl/pemerr.h \
   /opt/homebrew/opt/openssl@3/include/openssl/rand.h \
   /opt/homebrew/opt/openssl@3/include/openssl/randerr.h src/Ledger.h \
-  src/PoRep.h src/AS.h src/Transaction.h src/contractVal.h
+  src/PoRep.h src/AS.h src/Transaction.h src/contractVal.h \
+  src/ReplicaCompression.h
 src/crypto.h:
 /opt/homebrew/opt/openssl@3/include/openssl/sha.h:
 /opt/homebrew/opt/openssl@3/include/openssl/macros.h:
@@ -110,3 +111,4 @@ src/PoRep.h:
 src/AS.h:
 src/Transaction.h:
 src/contractVal.h:
+src/ReplicaCompression.h:
