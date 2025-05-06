@@ -80,14 +80,13 @@ int unspentOutput(OutputRef *utxo, const char *validator) {
 // This shows the all Tx's members of the Ledger.
 void printLedger(){
     FILE *fp = fopen("./output/Ledger.txt", "w");
-    fprintf(fp, "---- Print Ledger ----\n");
     for(int j = 0; j < block_count; j++) {
         for(int k = 0; k < Ledger[j].tx_count; k++) {
             fprintf(fp, "* TxID:\n%s\n", Ledger[j].txs[k].txid);
             if(Ledger[j].txs[k].input_count > 0) for(int i = 0; i < Ledger[j].txs[k].input_count; i++) fprintf(fp, "* Previous TxID %d:\n%s\n", i+1, Ledger[j].txs[k].inputs[i].outputRef.txid);
             for(int i = 0; i < Ledger[j].txs[k].output_count; i++) fprintf(fp, "* Output %d:\nAddress:\n%s\nValue:%d\n", i+1, Ledger[j].txs[k].outputs[i].Addr, Ledger[j].txs[k].outputs[i].value);
         }
-        fprintf(fp, "------------------\n");
+        fprintf(fp, "\n");
     }
     fclose(fp);
 }

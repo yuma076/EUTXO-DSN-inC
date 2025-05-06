@@ -1,15 +1,14 @@
----- Print Ledger ----
 * TxID:
 4e7dcf3fa6a3693f1e5c0092366719291f389ec6b78e6bc7e312a7f1cf5b94b8
 * Output 1:
 Address:
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErlQ7eRokhvN1GZGPrrlno8GOn/gF
-PT5Xf7PW29O7mhTzSqI07bqlR21PQ1cCn2LBmCdoMNrk4lTO1x6+HC6TAg==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEeY1o/oCA3HPmBcIxiIsoeZgMVQa+
+Iiv7eoyrRosCe81g4k2yF7dg10c3jMO8+0WfsNvI+bo065GiDHf1WUERoQ==
 -----END PUBLIC KEY-----
 
 Value:1000
-------------------
+
 * TxID:
 26653d2db6c14b23be7323e5d3ab2641d31c9c13d6ae39d0314579af7b5b0c13
 * Previous TxID 1:
@@ -17,20 +16,20 @@ Value:1000
 * Output 1:
 Address:
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEiA6vU3EBhLc1+WEil/L/+t+wBiJz
-cVUM6ClIVxLiaZnEkDxnPXlA1wOPoFAEA4Yul5q6TSXTtBu/+omk46BPDQ==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoaT3VVod+64ZMZsAIaegEdPhmPv3
+HQGkFDIAGAzzAY0M7MM+M3bC9svZNYqH7lK79Pb6RtqlSbkynRyq/rDdKQ==
 -----END PUBLIC KEY-----
 
 Value:300
 * Output 2:
 Address:
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErlQ7eRokhvN1GZGPrrlno8GOn/gF
-PT5Xf7PW29O7mhTzSqI07bqlR21PQ1cCn2LBmCdoMNrk4lTO1x6+HC6TAg==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEeY1o/oCA3HPmBcIxiIsoeZgMVQa+
+Iiv7eoyrRosCe81g4k2yF7dg10c3jMO8+0WfsNvI+bo065GiDHf1WUERoQ==
 -----END PUBLIC KEY-----
 
 Value:700
-------------------
+
 * TxID:
 eb848727689aeb151d3fadc35aa190ba6a00660016e847d491da5a173c94eaa9
 * Previous TxID 1:
@@ -40,16 +39,16 @@ eb848727689aeb151d3fadc35aa190ba6a00660016e847d491da5a173c94eaa9
 * Output 1:
 Address:
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEiA6vU3EBhLc1+WEil/L/+t+wBiJz
-cVUM6ClIVxLiaZnEkDxnPXlA1wOPoFAEA4Yul5q6TSXTtBu/+omk46BPDQ==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoaT3VVod+64ZMZsAIaegEdPhmPv3
+HQGkFDIAGAzzAY0M7MM+M3bC9svZNYqH7lK79Pb6RtqlSbkynRyq/rDdKQ==
 -----END PUBLIC KEY-----
 
 Value:200
 * Output 2:
 Address:
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErlQ7eRokhvN1GZGPrrlno8GOn/gF
-PT5Xf7PW29O7mhTzSqI07bqlR21PQ1cCn2LBmCdoMNrk4lTO1x6+HC6TAg==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEeY1o/oCA3HPmBcIxiIsoeZgMVQa+
+Iiv7eoyrRosCe81g4k2yF7dg10c3jMO8+0WfsNvI+bo065GiDHf1WUERoQ==
 -----END PUBLIC KEY-----
 
 Value:500
@@ -60,12 +59,12 @@ Value:100
 * Output 4:
 Address:
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEiA6vU3EBhLc1+WEil/L/+t+wBiJz
-cVUM6ClIVxLiaZnEkDxnPXlA1wOPoFAEA4Yul5q6TSXTtBu/+omk46BPDQ==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoaT3VVod+64ZMZsAIaegEdPhmPv3
+HQGkFDIAGAzzAY0M7MM+M3bC9svZNYqH7lK79Pb6RtqlSbkynRyq/rDdKQ==
 -----END PUBLIC KEY-----
 
 Value:200
-------------------
+
 * TxID:
 014337deec4be93ccf2a0347aed539e384c2c8d1ffd3531d406598a15f6e4dec
 * Previous TxID 1:
@@ -74,7 +73,7 @@ eb848727689aeb151d3fadc35aa190ba6a00660016e847d491da5a173c94eaa9
 Address:
 5f27dfbca30b4d8c0f441ad1d0ebd6973f381cf484207101c1704068f62a5eb0
 Value:100
-------------------
+
 * TxID:
 887c3a0598551b190cc5b738245fc1ee35577c3c983f3775d4018abbc47cb5d4
 * Previous TxID 1:
@@ -83,7 +82,7 @@ Value:100
 Address:
 5f27dfbca30b4d8c0f441ad1d0ebd6973f381cf484207101c1704068f62a5eb0
 Value:100
-------------------
+
 * TxID:
 df43143a8ffd47edf4dcd8bbd997568a407f353d6c77e71a5c784a900082c3a2
 * Previous TxID 1:
@@ -92,7 +91,7 @@ df43143a8ffd47edf4dcd8bbd997568a407f353d6c77e71a5c784a900082c3a2
 Address:
 5f27dfbca30b4d8c0f441ad1d0ebd6973f381cf484207101c1704068f62a5eb0
 Value:100
-------------------
+
 * TxID:
 615e521ac27ca057dd7bdd29537c41a6d984c0f915c1c17560fd42bd6a7860f0
 * Previous TxID 1:
@@ -100,9 +99,9 @@ df43143a8ffd47edf4dcd8bbd997568a407f353d6c77e71a5c784a900082c3a2
 * Output 1:
 Address:
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEiA6vU3EBhLc1+WEil/L/+t+wBiJz
-cVUM6ClIVxLiaZnEkDxnPXlA1wOPoFAEA4Yul5q6TSXTtBu/+omk46BPDQ==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoaT3VVod+64ZMZsAIaegEdPhmPv3
+HQGkFDIAGAzzAY0M7MM+M3bC9svZNYqH7lK79Pb6RtqlSbkynRyq/rDdKQ==
 -----END PUBLIC KEY-----
 
 Value:100
-------------------
+

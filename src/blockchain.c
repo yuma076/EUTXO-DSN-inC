@@ -400,7 +400,7 @@ int main(int argc, char *argv[]) {
     PoRep_Extract(0, tauD, replica, N, Provider_key, Provider_iv, Pext_padding_Uencdata);
 #endif
 #endif
-    // Provider encodes D(extracted_encdata) into D'(Penc_padding_Uencdata).
+    // Provider encodes D(Pext_padding_Uencdata) into D'(Penc_padding_Uencdata).
     char *Penc_padding_Uencdata = (char*)malloc(VDE_CT_LEN(pct_len + 1));  // processed free
     if (!Penc_padding_Uencdata) {
         printf("Fail to allocate memory.\n");
@@ -431,6 +431,8 @@ int main(int argc, char *argv[]) {
         printf("    [P] -- (G,D',Y) --> [U]\n");
         // Provider passes (G, D', Y) to User.
 
+    // User verifies the relation between D' and Y by Oracle.
+    AS_Relation_Oracle(group, Penc_padding_Uencdata, Y, ctx, Pext_padding_Uencdata, pct_len, Extract_key, Extract_iv);
     // User generates Schnorr keys for the Adaptor Signature. (AS_pubkey = g^AS_privkey)
     EC_POINT *AS_pubkey = EC_POINT_new(group); // processed free
     BIGNUM *AS_privkey = BN_new(); // processed free

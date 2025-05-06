@@ -1,5 +1,31 @@
 #include "AS.h"
 
+bool AS_Relation_Oracle(EC_GROUP *g, char *encdata, EC_POINT *Y, BN_CTX *ctx, char* data, int data_len, unsigned char *key, unsigned char *iv) {
+    bool result = true;
+    char *encdatad = (char*)malloc(VDE_CT_LEN(data_len + 1));  // processed free
+    if (!encdatad) {
+        printf("Fail to allocate memory.\n");
+        return 1;
+    }
+    memset(encdatad, 0, VDE_CT_LEN(data_len + 1));
+    VDE_encode((const unsigned char*)data, data_len, key, iv, encdatad, 0);
+    if(strcmp(encdata, encdatad) != 0) result &= false;
+
+    unsigned char Extract_keys[AES_KEY_SIZE + AES_BLOCK_SIZE] = {};
+    memcpy(Extract_keys, key, AES_KEY_SIZE);
+    memcpy(Extract_keys + AES_KEY_SIZE, iv, AES_BLOCK_SIZE);
+    EC_POINT *Yd = EC_POINT_new(g); // processed free
+    BIGNUM *K = BN_bin2bn(Extract_keys, AES_KEY_SIZE + AES_BLOCK_SIZE, NULL); // processed free
+    EC_POINT_mul(g, Yd, K, NULL, NULL, ctx);
+    if(EC_POINT_cmp(g, Y, Yd, ctx) != 0) result &= false;
+
+    free(encdatad);
+    EC_POINT_free(Yd);
+    BN_free(K);
+
+    return result;
+}
+
 void AS_pSign(const EC_GROUP *group, const EC_POINT *AS_pubkey, const BIGNUM *AS_privkey, const EC_POINT *Y, BIGNUM *s_hat_out, BIGNUM *r_out, BN_CTX *ctx) {
     BIGNUM *k = BN_new(), *r = BN_new(), *s_hat = BN_new(), *order = BN_new(), *e = BN_new(); // processed free
     EC_POINT *Gk = EC_POINT_new(group); // processed free
