@@ -169,37 +169,67 @@ void makeTx(const char *sender_pub, char *validator, char *redeemer, char *input
 
 //---- ECDSA Signature Redeemer and Validator -----
 // make_signRedeemer(privkey.pem) -> (signature,signature_length)
-bool make_signRedeemer(const char *privkey_file, const unsigned char *data, unsigned char **sig, unsigned int *sig_len) {
+bool make_signRedeemer(const char *privkey_file, const unsigned char *data, unsigned char **sig, unsigned int *sig_len) {    
     FILE *fp = fopen(privkey_file, "r");
     if (!fp) {
         printf("Failed opening private key file.\n");
         exit(EXIT_FAILURE);
     }
 
-    EC_KEY *ec_key = PEM_read_ECPrivateKey(fp, NULL, NULL, NULL);
+    EVP_PKEY *ec_key = PEM_read_PrivateKey(fp, NULL, NULL, NULL);
     fclose(fp);
     if (!ec_key) {
         printf("Failed to load EC private key\n");
         return false;
     }
 
-    ECDSA_SIG *ecdsa_sig = ECDSA_do_sign(data, BIN_HASH_SIZE, ec_key);
-    if (!ecdsa_sig) {
-        EC_KEY_free(ec_key);
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+    if (!mdctx) {
+        EVP_PKEY_free(ec_key);
         return false;
     }
 
-    int siglen = i2d_ECDSA_SIG(ecdsa_sig, NULL);
-    *sig = (unsigned char *)malloc(siglen);
+    if (EVP_DigestSignInit(mdctx, NULL, EVP_sha256(), NULL, ec_key) <= 0) {
+        EVP_MD_CTX_free(mdctx);
+        EVP_PKEY_free(ec_key);
+        return false;
+    }
+
+    if (EVP_DigestSignUpdate(mdctx, data, BIN_HASH_SIZE) <= 0) {
+        EVP_MD_CTX_free(mdctx);
+        EVP_PKEY_free(ec_key);
+        return false;
+    }
+
+    size_t len = 0;
+
+    if (EVP_DigestSignFinal(mdctx, NULL, &len) <= 0) {
+        EVP_MD_CTX_free(mdctx);
+        EVP_PKEY_free(ec_key);
+        return false;
+    }
+
+    *sig = (unsigned char *)malloc(len);
     if (!*sig) {
         printf("Fail to allocate memory.\n");
-        exit(EXIT_FAILURE);
+        EVP_MD_CTX_free(mdctx);
+        EVP_PKEY_free(ec_key);
+        return false;
     }
-    unsigned char *p = *sig;
-    *sig_len = i2d_ECDSA_SIG(ecdsa_sig, &p);
 
-    ECDSA_SIG_free(ecdsa_sig);
-    EC_KEY_free(ec_key);
+    if (EVP_DigestSignFinal(mdctx, *sig, &len) <= 0) {
+        free(*sig);
+        *sig = NULL;
+        *sig_len = 0;
+        EVP_MD_CTX_free(mdctx);
+        EVP_PKEY_free(ec_key);
+        return false;
+    }
+
+    *sig_len = (unsigned int)len;
+
+    EVP_MD_CTX_free(mdctx);
+    EVP_PKEY_free(ec_key);
     return true;
 }
 
@@ -218,22 +248,29 @@ bool signValidator(Context *cntxt) {
     unsigned char *signature = base64_decode(b64_sig); // processed free
 
     BIO *bio = BIO_new_mem_buf(sender_pub_pem, -1);
-    EC_KEY *ec_key = PEM_read_bio_EC_PUBKEY(bio, NULL, NULL, NULL);
+    if (!bio) return false;
+    EVP_PKEY *ec_key = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL);
     BIO_free(bio);
 
-    const unsigned char *p = signature;
-    ECDSA_SIG *ecdsa_sig = d2i_ECDSA_SIG(NULL, &p, siglen);
-    if (!ecdsa_sig) {
-        free(signature);
-        EC_KEY_free(ec_key);
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+    if (!mdctx) {
+        EVP_PKEY_free(ec_key);
         return false;
     }
 
-    int verify_status = ECDSA_do_verify(sign_hashdata, BIN_HASH_SIZE, ecdsa_sig, ec_key);
+    int verify_status = EVP_DigestVerifyInit(mdctx, NULL, EVP_sha256(), NULL, ec_key);
+    if (verify_status != 1) {
+        EVP_MD_CTX_free(mdctx);
+        EVP_PKEY_free(ec_key);
+        return false;
+    }
 
-    ECDSA_SIG_free(ecdsa_sig);
-    EC_KEY_free(ec_key);
+    verify_status = EVP_DigestVerify(mdctx, signature, siglen, sign_hashdata, BIN_HASH_SIZE);
+
+    EVP_MD_CTX_free(mdctx);
+    EVP_PKEY_free(ec_key);
     free(signature);
+    
     return verify_status == 1;
 }
 

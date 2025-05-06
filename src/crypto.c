@@ -140,31 +140,56 @@ unsigned char *base64_decode(const char *input) {
 
 // generate public key and private key as a wallet
 void genWallet(char *pubkey_file, char *privkey_file) {
-    EC_KEY *ec_key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
-    if (!ec_key || !EC_KEY_generate_key(ec_key)) {
-        printf("Failed to generate EC key\n");
+    EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL);
+    if (!pctx) {
+        printf("Failed to create EVP_PKEY_CTX.\n");
         exit(EXIT_FAILURE);
     }
+
+    if (EVP_PKEY_keygen_init(pctx) <= 0 ||
+        EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pctx, NID_X9_62_prime256v1) <= 0) {
+        printf("Failed to initialize EC key generation.\n");
+        EVP_PKEY_CTX_free(pctx);
+        exit(EXIT_FAILURE);
+    }
+
+    EVP_PKEY *pkey = NULL;
+    if (EVP_PKEY_keygen(pctx, &pkey) <= 0) {
+        printf("Failed to generate EC key.\n");
+        EVP_PKEY_CTX_free(pctx);
+        exit(EXIT_FAILURE);
+    }
+    EVP_PKEY_CTX_free(pctx);
 
     FILE *fp = fopen(pubkey_file, "w");
     if (!fp) {
         printf("Failed opening public key file.\n");
-        EC_KEY_free(ec_key);
+        EVP_PKEY_free(pkey);
         exit(EXIT_FAILURE);
     }
-    PEM_write_EC_PUBKEY(fp, ec_key);
+    if (!PEM_write_PUBKEY(fp, pkey)) {
+        printf("Failed writing public key.\n");
+        fclose(fp);
+        EVP_PKEY_free(pkey);
+        exit(EXIT_FAILURE);
+    }
     fclose(fp);
 
     fp = fopen(privkey_file, "w");
     if (!fp) {
         printf("Failed opening private key file.\n");
-        EC_KEY_free(ec_key);
+        EVP_PKEY_free(pkey);
         exit(EXIT_FAILURE);
     }
-    PEM_write_ECPrivateKey(fp, ec_key, NULL, NULL, 0, NULL, NULL);
+    if (!PEM_write_PrivateKey(fp, pkey, NULL, NULL, 0, NULL, NULL)) {
+        printf("Failed writing private key.\n");
+        fclose(fp);
+        EVP_PKEY_free(pkey);
+        exit(EXIT_FAILURE);
+    }
     fclose(fp);
 
-    EC_KEY_free(ec_key);
+    EVP_PKEY_free(pkey);
 }
 
 // randomly generate AES 256bit key and IV
