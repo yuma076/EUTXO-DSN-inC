@@ -5,6 +5,17 @@ int block_count = 0;
 Block txpool;
 
 void makeValIn_from_now(Tx *tx, double seconds) {
+#ifdef _WIN32
+    QueryPerformanceFrequency(&tx->validityInterval.frequency);
+
+    LARGE_INTEGER now;
+    QueryPerformanceCounter(&now);
+
+    tx->validityInterval.start = now;
+
+    LONGLONG offset_counts = (LONGLONG)(seconds * (double)tx->validityInterval.frequency.QuadPart);
+    tx->validityInterval.end.QuadPart = tx->validityInterval.start.QuadPart + offset_counts;
+#else
     time_t sec = (time_t)seconds;
     long nsec = (long)((seconds - (double)sec) * 1e9);
 
@@ -20,6 +31,7 @@ void makeValIn_from_now(Tx *tx, double seconds) {
         long sec_decrement = (-(tx->validityInterval.end.tv_nsec) + 999999999L) / 1000000000L;
         tx->validityInterval.end.tv_sec -= sec_decrement;
     }
+#endif
 }
 
 // look up Tx 
@@ -109,8 +121,14 @@ void copyTx(Tx *destination_tx, Tx *source_tx) {
         destination_tx->outputs[i].usp = source_tx->outputs[i].usp;
     }
     destination_tx->output_count = source_tx->output_count;
+#ifdef _WIN32
+    destination_tx->validityInterval.start.QuadPart = source_tx->validityInterval.start.QuadPart;
+    destination_tx->validityInterval.end.QuadPart = source_tx->validityInterval.end.QuadPart;
+    destination_tx->validityInterval.frequency.QuadPart = source_tx->validityInterval.frequency.QuadPart;
+#else
     destination_tx->validityInterval.start = source_tx->validityInterval.start;
     destination_tx->validityInterval.end = source_tx->validityInterval.end;
+#endif
 }
 
 // This records the Block in the ledger.

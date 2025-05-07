@@ -201,10 +201,15 @@ void generate_key_iv(unsigned char *key, unsigned char *iv) {
 // delay encoding by AES.
 int VDE_encode(const unsigned char *plaintext, int plaintext_len, const unsigned char *key, const unsigned char *iv, char *ciphertext, double delay) {
     if(delay > 0) {
+    #ifdef _WIN32
+        DWORD milliseconds = (DWORD)(delay * 1000.0);
+        Sleep(milliseconds);
+    #else
         struct timespec d;
         d.tv_sec = (time_t)delay;
         d.tv_nsec = (long)((delay - (double)d.tv_sec) * 1e9);
         nanosleep(&d, NULL); // delay
+    #endif
     }
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx) {

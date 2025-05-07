@@ -58,6 +58,19 @@ bool contractValidator(Context *cntxt) {
         free(Provider_iv);
         
         // Verify current clock is in validity Interval.
+    #ifdef _WIN32
+        LARGE_INTEGER current;
+        QueryPerformanceCounter(&current);
+
+        LONGLONG start = cntxt->validityInterval.start.QuadPart;
+        LONGLONG end = cntxt->validityInterval.end.QuadPart;
+        LONGLONG now = current.QuadPart;
+
+        if (!(now > start && now < end)) {
+            result &= false;
+            printf("invalid Interval\n");
+        }
+    #else
         struct timespec current;
         clock_gettime(CLOCK_REALTIME, &current);
         if(!(((current.tv_sec > cntxt->validityInterval.start.tv_sec) ||
@@ -67,6 +80,7 @@ bool contractValidator(Context *cntxt) {
                     result &= false;
                     printf("invalid Interval\n");
                     }
+    #endif
         break;
     }
     case Extract: {

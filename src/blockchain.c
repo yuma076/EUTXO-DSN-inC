@@ -167,7 +167,10 @@ bool testTx(int id, char** replica, int N, int collateral, char **tauD, unsigned
     makeTx("./pem/validator_address.hex", validator, redeemer, input_datum, collateral, "./pem/validator_address.hex", output_datum, &tx);
     free(redeemer);
     genTxid(&tx, tx.txid);
-    if (!verifyTx(&tx)) return false;
+    if (!verifyTx(&tx)) {
+        printf("Fail to verify Tx.\n");
+        return false;
+    }
     
     copyTx(&txpool.txs[txpool.tx_count++], &tx);
     if(txpool.tx_count >= MAX_TXS) chainBlock();
@@ -236,7 +239,10 @@ bool complete_finalTx(const EC_GROUP *group, Tx *tx, const EC_POINT *AS_pubkey, 
     makeTx("./pem/validator_address.hex", validator, redeemer, input_datum, collateral, receiver_pub, output_datum, tx);
 
     genTxid(tx, tx->txid);
-    if (!verifyTx(tx)) return false;
+    if (!verifyTx(tx)) {
+        printf("Fail to verify Tx.\n");
+        return false;
+    }
     
     copyTx(&txpool.txs[txpool.tx_count++], tx);
     if(txpool.tx_count >= MAX_TXS) chainBlock();

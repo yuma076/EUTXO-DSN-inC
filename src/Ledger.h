@@ -1,13 +1,6 @@
 #ifndef LEDGER_H
 #define LEDGER_H
 
-#ifdef _WIN32
-    #include <windows.h>
-#else
-    #include <time.h>
-    #include <unistd.h>
-#endif
-
 #include "crypto.h"
 
 #define MAX_INPUTS 10
@@ -19,7 +12,7 @@
 
 #define CHALLENGE_NUM 10
 
-#define MAX_REDEEMER_LEN 10+CHALLENGE_NUM*(VDE_CT_LEN(64)+1)+64+(2*VDE_CT_LEN(MAX_DATA_SIZE/BIN_HASH_SIZE)*65+1)+10+CHALLENGE_NUM*(VDE_CT_LEN(MAX_DATA_SIZE/BIN_HASH_SIZE)+1)*10+64*2+7
+#define MAX_REDEEMER_LEN 10+CHALLENGE_NUM*(VDE_CT_LEN(64)+1)+64+(2*VDE_CT_LEN(MAX_DATA_SIZE/32)*65+1)+10+CHALLENGE_NUM*(VDE_CT_LEN(MAX_DATA_SIZE/32)+1)*10+64*2+7
 
 
 typedef enum enmdat{

@@ -52,8 +52,6 @@ void makeTx(const char *sender_pub, char *validator, char *redeemer, char *input
     }
 
     Context cntxt = {0};
-    cntxt.validityInterval.start = tx->validityInterval.start;
-    cntxt.validityInterval.end = tx->validityInterval.end;
     // make InputInfo of Context
     for (int i = 0; i < utxo_count; i++) {
         Tx *belongTx = lookupTx(utxos[i].txid);
@@ -85,9 +83,15 @@ void makeTx(const char *sender_pub, char *validator, char *redeemer, char *input
     char datumHash[HEX_HASH_SIZE + 1] = {};
     binToHex(bin_datumHash, datumHash);
     strcpy(cntxt.outputInfo[cntxt.outputInfo_count].datumHash, datumHash);
-    // make validityInterval
+    // make validityInterval of Context
+#ifdef _WIN32
+    cntxt.validityInterval.start.QuadPart = tx->validityInterval.start.QuadPart;
+    cntxt.validityInterval.end.QuadPart = tx->validityInterval.end.QuadPart;
+    cntxt.validityInterval.frequency.QuadPart = tx->validityInterval.frequency.QuadPart;
+#else
     cntxt.validityInterval.start = tx->validityInterval.start;
     cntxt.validityInterval.end = tx->validityInterval.end;
+#endif
 
     // Validate for each InputInfo of Context.
     int accumulated = 0;
@@ -168,7 +172,7 @@ void makeTx(const char *sender_pub, char *validator, char *redeemer, char *input
 }
 
 //---- ECDSA Signature Redeemer and Validator -----
-// make_signRedeemer(privkey.pem) -> (signature,signature_length)
+// make_signRedeemer(privkey.pem,data) -> (signature,signature_length)
 bool make_signRedeemer(const char *privkey_file, const unsigned char *data, unsigned char **sig, unsigned int *sig_len) {    
     FILE *fp = fopen(privkey_file, "r");
     if (!fp) {
@@ -233,7 +237,7 @@ bool make_signRedeemer(const char *privkey_file, const unsigned char *data, unsi
     return true;
 }
 
-// signValidator(Input) -> 0/1
+// signValidator(Context) -> 0/1
 bool signValidator(Context *cntxt) {
     char sign_data[100];
     unsigned char sign_hashdata[BIN_HASH_SIZE];
@@ -270,7 +274,7 @@ bool signValidator(Context *cntxt) {
     EVP_MD_CTX_free(mdctx);
     EVP_PKEY_free(ec_key);
     free(signature);
-    
+
     return verify_status == 1;
 }
 
@@ -313,7 +317,10 @@ bool payTx(const char *sender_pub, const char *sender_priv, const char *receiver
     free(receiver_pub_pem);
 
     genTxid(&tx, tx.txid);
-    if (!verifyTx(&tx)) return false;
+    if (!verifyTx(&tx)) {
+        printf("Fail to verify Tx.\n");
+        return false;
+    }
 
     copyTx(&txpool.txs[txpool.tx_count++], &tx);
     if(txpool.tx_count >= MAX_TXS) chainBlock();

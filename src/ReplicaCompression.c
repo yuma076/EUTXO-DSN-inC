@@ -49,9 +49,11 @@ void PoRep_Prove_malicious(char** replica, int N, int id, int *challenge, char**
             memset(ext_proof, 0, VDE_CT_LEN(BIN_HASH_SIZE) + 1);
             if(!lookupproof(challenge[i], ext_proof)) {
                 printf("Can't find this proof in the Ledger.\n");
+                free(ext_proof);
                 exit(EXIT_FAILURE);
             }
             snprintf(proof[i], VDE_CT_LEN(BIN_HASH_SIZE) + 1, "%s", ext_proof);
+            free(ext_proof);
         } else snprintf(proof[i], VDE_CT_LEN(BIN_HASH_SIZE) + 1, "%s", replica[challenge[i]]);
     }
     for(int i = 0; i < CHALLENGE_NUM; i++) {
@@ -71,15 +73,18 @@ void PoRep_Extract_malicious(int id, char **tauD, char **replica, int N, const u
             memset(ext_replica, 0, VDE_CT_LEN(BIN_HASH_SIZE) + 1);
             if(!lookupproof(i, ext_replica)) {
                 printf("Can't find this proof in the Ledger.\n");
+                free(ext_replica);
                 exit(EXIT_FAILURE);
             }
             replica[i] = (char*)malloc(VDE_CT_LEN(BIN_HASH_SIZE) + 1); // processed free
             if (!replica[i]) {
                 printf("Fail to allocate memory.\n");
+                free(ext_replica);
                 exit(EXIT_FAILURE);
             }
             memset(replica[i], 0, VDE_CT_LEN(BIN_HASH_SIZE) + 1);
             snprintf(replica[i], VDE_CT_LEN(BIN_HASH_SIZE) + 1, "%s", ext_replica);
+            free(ext_replica);
         }
     }
     PoRep_Extract(id, tauD, replica, N, Provider_key, Provider_iv, data);
