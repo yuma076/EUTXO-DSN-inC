@@ -1,6 +1,5 @@
-obj/blockchain.o: src/blockchain.c src/blockchain.h src/Transaction.h \
-  src/Ledger.h src/crypto.h \
-  /opt/homebrew/opt/openssl@3/include/openssl/sha.h \
+obj/main.o: src/main.c src/blockchain.h src/Transaction.h src/Ledger.h \
+  src/crypto.h /opt/homebrew/opt/openssl@3/include/openssl/sha.h \
   /opt/homebrew/opt/openssl@3/include/openssl/macros.h \
   /opt/homebrew/opt/openssl@3/include/openssl/opensslconf.h \
   /opt/homebrew/opt/openssl@3/include/openssl/configuration.h \
