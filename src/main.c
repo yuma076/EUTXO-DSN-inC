@@ -1,4 +1,5 @@
 #include "blockchain.h"
+#include "crypto.h"
 
 int main(int argc, char *argv[]) {
     OpenSSL_add_all_algorithms();
@@ -17,6 +18,7 @@ int main(int argc, char *argv[]) {
     if(!payTx("./pem/User_pub.pem", "./pem/User_priv.pem", "./pem/Provider_pub.pem", 300)) return 1;
     printf("Setup: success\n");
 // ----- Setup ------ //
+
 // ----- Preprocessing phase ----- //
     // User has the original data.
     if (argc < 2) {
@@ -104,14 +106,17 @@ int main(int argc, char *argv[]) {
 #if !defined (MODE_BURNT) || (MODE_BURNT != 0)
 // ----- Preservation phase ----- //
     // Provider makes a publicly verifiable proof showing the storage of R and submits Tx embedding it n times.
-    int porep_times = 3;
+    int porep_times = 15;
+    clock_t start = clock();
     for(int i = 0; i < porep_times; i++) {
         if(!testTx(0, replica, N, collateral, tauD, Provider_key, Provider_iv)) return 1;
         int c = 0;
         for(int j = 0; j < N; j++) if(replica[j] != NULL) c += VDE_CT_LEN(BIN_HASH_SIZE);
-        printf("[P]Replica size (%d):%d B\n", i, c);
+        printf("[P]Replica size (%d):%6d B\n", i+1, c);
     }
-    printf("[P]Preservation phase: success\n");
+    clock_t end = clock();
+    double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("[P]Preservation phase: success; %5fs\n", elapsed);
 // ----- Preservation phase ----- //
 #else
 // ----- Preservation phase (Case where collateral is Burnt due to proof failure) ----- //
@@ -150,7 +155,7 @@ int main(int argc, char *argv[]) {
     }
     memset(Pext_padding_Uencdata, 0 , pct_len + 1);
 #if !defined (MODE_BURNT) || (MODE_BURNT != 0)
-#if defined (MODE_REPLICA_COMPRESSION)
+#ifdef MODE_REPLICA_COMPRESSION
     PoRep_Extract_malicious(0, tauD, replica, N, Provider_key, Provider_iv, Pext_padding_Uencdata);
 #else
     PoRep_Extract(0, tauD, replica, N, Provider_key, Provider_iv, Pext_padding_Uencdata);

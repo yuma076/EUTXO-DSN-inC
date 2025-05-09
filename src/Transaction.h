@@ -6,7 +6,8 @@
 
 void genTxid(Tx *tx, char *txid);
 bool verifyTx(Tx *tx);
-void makeTx(const char *sender_pub, char *validator, char *redeemer, char *input_datum, int value, const char *receiver_pub, char *output_datum, Tx *tx);
+void makeContext(Tx *tx, Context *cntxt);
+void makeTx(char *validator, char *redeemer, char *input_datum, int value, const char *receiver_pub, char *output_datum, Tx *tx);
 
 bool make_signRedeemer(const char *privkey_file, const unsigned char *data, unsigned char **sig, unsigned int *sig_len);
 bool signValidator(Context *cntxt);

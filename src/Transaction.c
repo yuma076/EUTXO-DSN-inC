@@ -20,144 +20,188 @@ void genTxid(Tx *tx, char *txid) {
 
 // verify Tx construction
 bool verifyTx(Tx *tx){
-    if (strcmp(tx->txid, "") == 0) {
-        printf("Failed to verify Tx!\n");
-        return false;
+    bool result = true;
+    if (strcmp(tx->txid, "") == 0) result ^= false;
+    if (tx->input_count == 0) return result;
+    Context cntxt = {0};
+    makeContext(tx, &cntxt);
+
+    char* validator_addr;
+    for (int i = 0; i < cntxt.inputInfo_count; i++) {
+        cntxt.thisInput = i;
+        validator_addr = read_file(tx->inputs[i].validator);
+        BIO *bio = BIO_new_mem_buf((void*)validator_addr, -1);
+        if (!bio) {
+            printf("BIO_new_mem_buf failed.\n");
+            exit(EXIT_FAILURE);
+        }
+        EVP_PKEY *pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL);
+        BIO_free(bio);
+
+        if (pkey) {
+            if (!signValidator(&cntxt)) result ^= false;
+        } else if (strcmp(tx->inputs[i].validator, "./pem/validator_address.hex") == 0) {
+            if (contractValidator(&cntxt)) result ^= false;
+        } else {
+            printf("This is an incorrect Validator.\n");
+            exit(EXIT_FAILURE);
+        }
+        EVP_PKEY_free(pkey);
     }
-    return true;
+    return result;
 }
 
-// makeTx(senderkeys(pub,priv),validator,redeemer,datum,value,receiver_pub,datumHash) -> Tx
-void makeTx(const char *sender_pub, char *validator, char *redeemer, char *input_datum, int value, const char *receiver_pub, char *output_datum, Tx *tx) {
-    if(value <= 0) {
+void makeContext(Tx *tx, Context *cntxt) {
+    // make InputInfo of Context
+    for (int i = 0; i < tx->input_count; i++) {
+        Tx *belongTx = lookupTx(tx->inputs[i].outputRef.txid);
+        if (belongTx == NULL) {
+            printf("TxID:%s does not exist.\n", tx->inputs[i].outputRef.txid);
+            exit(EXIT_FAILURE);
+        }
+        Output *indicate_output = &belongTx->outputs[tx->inputs[i].outputRef.index];
+        strcpy(cntxt->inputInfo[cntxt->inputInfo_count].outputRef.txid, tx->inputs[i].outputRef.txid);
+        cntxt->inputInfo[cntxt->inputInfo_count].outputRef.index = tx->inputs[i].outputRef.index;
+        char *validator_addr = read_file(tx->inputs[i].validator); // processed free
+        strcpy(cntxt->inputInfo[cntxt->inputInfo_count].ValidatorHash, validator_addr);
+        strcpy(cntxt->inputInfo[cntxt->inputInfo_count].datum, tx->inputs[i].datum);
+        strcpy(cntxt->inputInfo[cntxt->inputInfo_count].redeemer, tx->inputs[i].redeemer);
+        cntxt->inputInfo[cntxt->inputInfo_count].value = indicate_output->value;
+        cntxt->inputInfo[cntxt->inputInfo_count].usp = &indicate_output->usp;
+        cntxt->inputInfo_count++;
+        free(validator_addr);
+    }
+    // make OutputInfo of Context
+    cntxt->outputInfo[cntxt->outputInfo_count].value = tx->outputs[tx->output_count].value;
+    strcpy(cntxt->outputInfo[cntxt->outputInfo_count].ValidatorHash, tx->outputs[tx->output_count].Addr);
+    strcpy(cntxt->outputInfo[cntxt->outputInfo_count].datumHash, tx->outputs[tx->output_count].datumHash);
+    // make validityInterval of Context
+#ifdef _WIN32
+    cntxt->validityInterval.start.QuadPart = valInter.start.QuadPart;
+    cntxt->validityInterval.end.QuadPart = valInter.end.QuadPart;
+    cntxt->validityInterval.frequency.QuadPart = valInter.frequency.QuadPart;
+#else
+    cntxt->validityInterval.start = tx->validityInterval.start;
+    cntxt->validityInterval.end = tx->validityInterval.end;
+#endif
+}
+
+// makeTx(validator,redeemer,datum,value,receiver_pub,datumHash) -> Tx
+void makeTx(char *validator, char *redeemer, char *input_datum, int value, const char *receiver_pub, char *output_datum, Tx *tx) {
+    if (value <= 0) {
         printf("non-positive value.\n");
         exit(EXIT_FAILURE);
     }
-    OutputRef utxos[MAX_UTXO];
-    // load sender's public key in pem
-    char *sender_pub_pem = read_file(sender_pub); // processed free
     // load receiver's public key in pem
     char *receiver_pub_pem = read_file(receiver_pub); // processed free
+    char *validator_addr = read_file(validator); // processed free
 
-    unsigned char bin_validatorHash[BIN_HASH_SIZE] = {};
-    char validatorHash[HEX_HASH_SIZE + 1] = {};
-    calcHash((const unsigned char*)validator, strlen(validator), bin_validatorHash);
-    binToHex(bin_validatorHash, validatorHash);
-    // Gather UTXOs
-    int utxo_count = unspentOutput(utxos, validator);
-    if(utxo_count == 0) {
+    // Gather sender's UTXOs
+    OutputRef utxos[MAX_UTXO] = {0};
+    int utxo_count = unspentOutput(utxos, validator_addr);
+    if (utxo_count == 0) {
         printf("No UTXO was found for which the validator is %s.\n", validator);
         printLedger();
         exit(EXIT_FAILURE);
     }
 
-    Context cntxt = {0};
-    // make InputInfo of Context
+    Tx temp_tx = {0};
     for (int i = 0; i < utxo_count; i++) {
-        Tx *belongTx = lookupTx(utxos[i].txid);
-        if(belongTx == NULL) {
-            printf("TxID:%s does not exist.\n",utxos[i].txid);
-            exit(EXIT_FAILURE);
-        }
-        Output *indicate_output = &belongTx->outputs[utxos[i].index];
-        unsigned char bin_datumHash[BIN_HASH_SIZE] = {};
-        calcHash((const unsigned char*)input_datum, strlen(input_datum), bin_datumHash);
-        char datumHash[HEX_HASH_SIZE + 1] = {};
-        binToHex(bin_datumHash, datumHash);
-        if ((strcmp(indicate_output->Addr, sender_pub_pem) == 0) && (strcmp(indicate_output->datumHash, datumHash) == 0)) {
-            strcpy(cntxt.inputInfo[cntxt.inputInfo_count].outputRef.txid, utxos[i].txid);
-            cntxt.inputInfo[cntxt.inputInfo_count].outputRef.index = utxos[i].index;
-            strcpy(cntxt.inputInfo[cntxt.inputInfo_count].ValidatorHash, validatorHash);
-            strcpy(cntxt.inputInfo[cntxt.inputInfo_count].datum, input_datum);
-            strcpy(cntxt.inputInfo[cntxt.inputInfo_count].redeemer, redeemer);
-            cntxt.inputInfo[cntxt.inputInfo_count].value = indicate_output->value;
-            cntxt.inputInfo[cntxt.inputInfo_count].usp = &indicate_output->usp;
-            cntxt.inputInfo_count++;
-        }
+        strcpy(temp_tx.inputs[i].outputRef.txid, utxos[i].txid);
+        temp_tx.inputs[i].outputRef.index = utxos[i].index;
+        strcpy(temp_tx.inputs[i].validator, validator);
+        strcpy(temp_tx.inputs[i].datum, input_datum);
+        strcpy(temp_tx.inputs[i].redeemer, redeemer);
     }
-    // make OutputInfo of Context
-    cntxt.outputInfo[cntxt.outputInfo_count].value = value;
-    strcpy(cntxt.outputInfo[cntxt.outputInfo_count].ValidatorHash, receiver_pub_pem);
+    temp_tx.input_count = utxo_count;
+    temp_tx.outputs[temp_tx.output_count].value = value;
+    strcpy(temp_tx.outputs[temp_tx.output_count].Addr, receiver_pub_pem);
     unsigned char bin_datumHash[BIN_HASH_SIZE] = {};
     calcHash((const unsigned char*)output_datum, strlen(output_datum), bin_datumHash);
     char datumHash[HEX_HASH_SIZE + 1] = {};
     binToHex(bin_datumHash, datumHash);
-    strcpy(cntxt.outputInfo[cntxt.outputInfo_count].datumHash, datumHash);
-    // make validityInterval of Context
-#ifdef _WIN32
-    cntxt.validityInterval.start.QuadPart = tx->validityInterval.start.QuadPart;
-    cntxt.validityInterval.end.QuadPart = tx->validityInterval.end.QuadPart;
-    cntxt.validityInterval.frequency.QuadPart = tx->validityInterval.frequency.QuadPart;
-#else
-    cntxt.validityInterval.start = tx->validityInterval.start;
-    cntxt.validityInterval.end = tx->validityInterval.end;
-#endif
+    strcpy(temp_tx.outputs[temp_tx.output_count].datumHash, datumHash);
+    temp_tx.validityInterval.start = tx->validityInterval.start;
+    temp_tx.validityInterval.end = tx->validityInterval.end;
 
+    Context cntxt = {0};
+    makeContext(&temp_tx, &cntxt);
     // Validate for each InputInfo of Context.
     int accumulated = 0;
-    for(int i = 0; i < cntxt.inputInfo_count; i++) {
+    int val_input[MAX_INPUT] = {};
+    int val_input_count = 0;
+    for (int i = 0; i < cntxt.inputInfo_count; i++) {
         cntxt.thisInput = i;
-        if(strcmp(validator, "signVal") == 0) {
+        BIO *bio = BIO_new_mem_buf((void*)validator_addr, -1);
+        if (!bio) {
+            printf("BIO_new_mem_buf failed.\n");
+            exit(EXIT_FAILURE);
+        }
+        EVP_PKEY *pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL);
+        BIO_free(bio);
+        if (pkey) {
             char sign_data[100];
             unsigned char sign_hashdata[BIN_HASH_SIZE];
             snprintf(sign_data, sizeof(sign_data), "%s%d", cntxt.inputInfo[i].outputRef.txid, cntxt.inputInfo[i].outputRef.index);
             calcHash((unsigned char*)sign_data, strlen(sign_data), sign_hashdata);
             unsigned char *signature;
             unsigned int siglen = 0;
-            if(!make_signRedeemer(cntxt.inputInfo[i].redeemer, sign_hashdata, &signature, &siglen)) { // processed free
+            if (!make_signRedeemer(cntxt.inputInfo[i].redeemer, sign_hashdata, &signature, &siglen)) { // processed free
                 printf("Failed to sign.\n");
                 free(signature);
-                exit(EXIT_FAILURE);
             }
             char *b64_sig = base64_encode(signature, siglen); // processed free
-            snprintf(cntxt.inputInfo[i].redeemer, MAX_REDEEMER_LEN, "%s%c%s%c%d", sender_pub_pem, ',', b64_sig, ',', siglen);
+            snprintf(cntxt.inputInfo[i].redeemer, MAX_REDEEMER_LEN, "%s%c%d", b64_sig, ',', siglen);
             free(b64_sig);
             free(signature);
-            if(signValidator(&cntxt)) {
-                strcpy(tx->inputs[tx->input_count].outputRef.txid, cntxt.inputInfo[i].outputRef.txid);
-                tx->inputs[tx->input_count].outputRef.index = cntxt.inputInfo[i].outputRef.index;
-                strcpy(tx->inputs[tx->input_count].validator, validator);
-                strcpy(tx->inputs[tx->input_count].datum, cntxt.inputInfo[i].datum);
-                strcpy(tx->inputs[tx->input_count].redeemer, cntxt.inputInfo[i].redeemer);
+            if (signValidator(&cntxt)) {
+                val_input[val_input_count++] = i;
                 accumulated += cntxt.inputInfo[i].value;
-                *cntxt.inputInfo[i].usp = spent;
-                tx->input_count++;
             }
-        } else if(strcmp(validator, "contractVal") == 0) {
-            if(contractValidator(&cntxt)) {
-                strcpy(tx->inputs[tx->input_count].outputRef.txid, cntxt.inputInfo[i].outputRef.txid);
-                tx->inputs[tx->input_count].outputRef.index = cntxt.inputInfo[i].outputRef.index;
-                strcpy(tx->inputs[tx->input_count].validator, validator);
-                strcpy(tx->inputs[tx->input_count].datum, cntxt.inputInfo[i].datum);
-                strcpy(tx->inputs[tx->input_count].redeemer, cntxt.inputInfo[i].redeemer);
+        } else if (strcmp(validator, "./pem/validator_address.hex") == 0) {
+            if (contractValidator(&cntxt)) {
+                val_input[val_input_count++] = i;
                 accumulated += cntxt.inputInfo[i].value;
-                *cntxt.inputInfo[i].usp = spent;
-                tx->input_count++;
             }
         } else {
             printf("This is an incorrect Validator.\n");
             exit(EXIT_FAILURE);
         }
         
-        if (accumulated >= value) break;
+        EVP_PKEY_free(pkey);
+        if (val_input_count >= MAX_INPUT) {
+            printf("The number of inputs that can be paid at one time has been exceeded.\n");
+            exit(EXIT_FAILURE);
+        }
+        if(accumulated >= value) break;
     }
     
-
-    if(accumulated < value){
+    if (accumulated < value){
         printf("The balance is not enough.\n");
-        return;
+        exit(EXIT_FAILURE);
     }
 
+    // make Tx
+    for (int i = 0; i < val_input_count; i++) {
+        strcpy(tx->inputs[tx->input_count].outputRef.txid, cntxt.inputInfo[val_input[i]].outputRef.txid);
+        tx->inputs[tx->input_count].outputRef.index = cntxt.inputInfo[val_input[i]].outputRef.index;
+        strcpy(tx->inputs[tx->input_count].validator, validator);
+        strcpy(tx->inputs[tx->input_count].datum, cntxt.inputInfo[val_input[i]].datum);
+        strcpy(tx->inputs[tx->input_count].redeemer, cntxt.inputInfo[val_input[i]].redeemer);
+        *cntxt.inputInfo[val_input[i]].usp = spent;
+        tx->input_count++;
+    }
     tx->outputs[tx->output_count].value = cntxt.outputInfo[cntxt.outputInfo_count].value;
     strcpy(tx->outputs[tx->output_count].Addr, cntxt.outputInfo[cntxt.outputInfo_count].ValidatorHash);
     strcpy(tx->outputs[tx->output_count].datumHash, cntxt.outputInfo[cntxt.outputInfo_count].datumHash);
     tx->outputs[tx->output_count].usp = unspent;
     tx->output_count++;
 
+    // make change outputs
     if (accumulated > value) {
         Output *change = &tx->outputs[tx->output_count++];
         change->value = accumulated - value;
-        strcpy(change->Addr, sender_pub_pem);
+        strcpy(change->Addr, validator_addr);
         char change_datum[] = "Holding";
         memset(bin_datumHash, 0, BIN_HASH_SIZE);
         calcHash((const unsigned char*)change_datum, strlen(change_datum), bin_datumHash);
@@ -168,7 +212,7 @@ void makeTx(const char *sender_pub, char *validator, char *redeemer, char *input
     }
 
     free(receiver_pub_pem);
-    free(sender_pub_pem);
+    free(validator_addr);
 }
 
 //---- ECDSA Signature Redeemer and Validator -----
@@ -243,10 +287,17 @@ bool signValidator(Context *cntxt) {
     unsigned char sign_hashdata[BIN_HASH_SIZE];
     snprintf(sign_data, sizeof(sign_data), "%s%d", cntxt->inputInfo[cntxt->thisInput].outputRef.txid, cntxt->inputInfo[cntxt->thisInput].outputRef.index);
     calcHash((unsigned char*)sign_data, strlen(sign_data), sign_hashdata);
-
-    char *sender_pub_pem, *b64_sig, *csiglen;
-    sender_pub_pem = strtok(cntxt->inputInfo[cntxt->thisInput].redeemer, ",");
-    b64_sig = strtok(NULL, ",");
+    Tx *belongTx = lookupTx(cntxt->inputInfo[cntxt->thisInput].outputRef.txid);
+    if (belongTx == NULL) {
+        printf("TxID:%s does not exist.\n", cntxt->inputInfo[cntxt->thisInput].outputRef.txid);
+        exit(EXIT_FAILURE);
+    }
+    char sender_pub_pem[513] = {};
+    strcpy(sender_pub_pem, belongTx->outputs[cntxt->inputInfo[cntxt->thisInput].outputRef.index].Addr);
+    char *b64_sig, *csiglen;
+    char redeemer[MAX_REDEEMER_LEN] = {};
+    strcpy(redeemer, cntxt->inputInfo[cntxt->thisInput].redeemer);
+    b64_sig = strtok(redeemer, ",");
     csiglen = strtok(NULL, ",");
     unsigned int siglen = atoi(csiglen);
     unsigned char *signature = base64_decode(b64_sig); // processed free
@@ -299,7 +350,6 @@ bool payTx(const char *sender_pub, const char *sender_priv, const char *receiver
     } else {
     //generate payment Tx
         // Inputs
-        char validator[] = "signVal";
         char *redeemer = (char*)malloc(strlen(sender_priv) + 1);
         if (!redeemer) {
             printf("Fail to allocate memory.\n");
@@ -310,19 +360,18 @@ bool payTx(const char *sender_pub, const char *sender_priv, const char *receiver
         char input_datum[] = "Holding";
         // Outputs
         char output_datum[] = "Holding";
-        makeTx(sender_pub, validator, redeemer, input_datum, value, receiver_pub, output_datum, &tx);
-
+        makeTx((char*)sender_pub, redeemer, input_datum, value, receiver_pub, output_datum, &tx);
+        
         free(redeemer);
     }
     free(receiver_pub_pem);
 
     genTxid(&tx, tx.txid);
+
     if (!verifyTx(&tx)) {
         printf("Fail to verify Tx.\n");
         return false;
-    }
-
-    copyTx(&txpool.txs[txpool.tx_count++], &tx);
+    } else copyTx(&txpool.txs[txpool.tx_count++], &tx);
     if(txpool.tx_count >= MAX_TXS) chainBlock();
     
     return true;

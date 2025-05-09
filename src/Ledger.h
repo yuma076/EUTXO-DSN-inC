@@ -103,11 +103,10 @@ extern Block Ledger[MAX_BLOCKS];
 extern int block_count;
 extern Block txpool;
 
-void makeValIn_from_now(Tx *tx, double seconds);
-
+void makeValIn_from_now(Tx *tx, double start, double elapse);
 Tx *lookupTx(char *txid);
-int unspentTxOutput(Tx* tx, OutputRef *utxo, const char *validator);
-int unspentOutput(OutputRef *utxo, const char *validator);
+int unspentTxOutput(Tx* tx, OutputRef *utxo, const char *validator_addr);
+int unspentOutput(OutputRef *utxo, const char *validator_addr);
 
 void printLedger();
 void copyTx(Tx *destination_tx, Tx *source_tx);

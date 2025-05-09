@@ -3,6 +3,8 @@
 
 #include "PoRep.h"
 
+#define MODE_REPLICA_COMPRESSION (0)
+
 bool lookupproof(int ch, char *ext_proof);
 void PoRep_Prove_malicious(char **replica, int N, int id, int *challenge, char **proof);
 void PoRep_Extract_malicious(int id, char **tauD, char **replica, int N, const unsigned char *Provider_key, const unsigned char *Provider_iv, char *data);

@@ -4,7 +4,6 @@
 // partial tx for contract
 bool partial_contractTx(Tx *tx, const char* sender_pub, const char *sender_priv, const char *receiver_pub, int payment) {
     // inputs
-    char validator[] = "signVal";
     char *redeemer = (char*)malloc(strlen(sender_priv) + 1); // processed free
     if (!redeemer) {
         printf("Fail to allocate memory.\n");
@@ -16,7 +15,7 @@ bool partial_contractTx(Tx *tx, const char* sender_pub, const char *sender_priv,
     // outputs
     char output_datum[] = "Holding";
 
-    makeTx(sender_pub, validator, redeemer, input_datum, payment, receiver_pub, output_datum, tx);
+    makeTx((char*)sender_pub, redeemer, input_datum, payment, receiver_pub, output_datum, tx);
 
     free(redeemer);
 
@@ -27,7 +26,6 @@ bool partial_contractTx(Tx *tx, const char* sender_pub, const char *sender_priv,
 bool complete_contractTx(Tx *tx, const char* sender_pub, const char *sender_priv, int collateral) {
     // fill a part of inputs and outputs in Tx.
     // inputs
-    char validator[] = "signVal";
     char *redeemer = (char*)malloc(strlen(sender_priv) + 1); // processed free
     if (!redeemer) {
         printf("Fail to allocate memory.\n");
@@ -38,19 +36,18 @@ bool complete_contractTx(Tx *tx, const char* sender_pub, const char *sender_priv
     // outputs
     char output_datum[] = "Contract";
     
-    makeValIn_from_now(tx, 5);
+    makeValIn_from_now(tx, 0, 5);
 
-    makeTx(sender_pub, validator, redeemer, input_datum, collateral, "./pem/validator_address.hex", output_datum, tx);
+    makeTx((char*)sender_pub, redeemer, input_datum, collateral, "./pem/validator_address.hex", output_datum, tx);
 
     free(redeemer);
 
     genTxid(tx, tx->txid);
+
     if (!verifyTx(tx)) {
         printf("Fail to verify Tx.\n");
         return false;
-    }
-    
-    copyTx(&txpool.txs[txpool.tx_count++], tx);
+    }else copyTx(&txpool.txs[txpool.tx_count++], tx);
     if(txpool.tx_count >= MAX_TXS) chainBlock();
     
     return true;
@@ -77,7 +74,7 @@ bool testTx(int id, char** replica, int N, int collateral, char **tauD, unsigned
     PoRep_Poll(N, challenge);
     
 #if !defined (MODE_BURNT) || (MODE_BURNT != 0)
-#if defined (MODE_REPLICA_COMPRESSION)
+#ifdef MODE_REPLICA_COMPRESSION
     PoRep_Prove_malicious(replica, N, id, challenge, proof);
 #else
     PoRep_Prove(replica, N, id, challenge, proof);
@@ -140,24 +137,24 @@ bool testTx(int id, char** replica, int N, int collateral, char **tauD, unsigned
     free(b64_iv);
     
     // Inputs
-    char validator[] = "contractVal";
+    char validator[] = "./pem/validator_address.hex";
     char input_datum[] = "Contract";
     // Outputs
     char output_datum[] = "Contract";
 #if (MODE_BURNT == 1)
-    makeValIn_from_now(&tx, 0);
+    makeValIn_from_now(&tx, 0, 0);
 #else
-    makeValIn_from_now(&tx, 5);
+    makeValIn_from_now(&tx, 0, 5);
 #endif
-    makeTx("./pem/validator_address.hex", validator, redeemer, input_datum, collateral, "./pem/validator_address.hex", output_datum, &tx);
+    makeTx(validator, redeemer, input_datum, collateral, "./pem/validator_address.hex", output_datum, &tx);
     free(redeemer);
+
     genTxid(&tx, tx.txid);
+
     if (!verifyTx(&tx)) {
         printf("Fail to verify Tx.\n");
         return false;
-    }
-    
-    copyTx(&txpool.txs[txpool.tx_count++], &tx);
+    } else copyTx(&txpool.txs[txpool.tx_count++], &tx);
     if(txpool.tx_count >= MAX_TXS) chainBlock();
 
     return true;
@@ -214,22 +211,21 @@ bool complete_finalTx(const EC_GROUP *group, Tx *tx, const EC_POINT *AS_pubkey, 
 
     // Inputs
     // validator
-    char validator[] = "contractVal";
+    char validator[] = "./pem/validator_address.hex";
     // datum
     char input_datum[] = "Contract";
     strcpy(redeemer, tx->inputs[0].redeemer);
     // Outputs
     char output_datum[] = "Holding";
-    makeValIn_from_now(tx, 5);
-    makeTx("./pem/validator_address.hex", validator, redeemer, input_datum, collateral, receiver_pub, output_datum, tx);
+    makeValIn_from_now(tx, 0, 5);
+    makeTx(validator, redeemer, input_datum, collateral, receiver_pub, output_datum, tx);
 
     genTxid(tx, tx->txid);
+
     if (!verifyTx(tx)) {
         printf("Fail to verify Tx.\n");
         return false;
-    }
-    
-    copyTx(&txpool.txs[txpool.tx_count++], tx);
+    } else copyTx(&txpool.txs[txpool.tx_count++], tx);
     if(txpool.tx_count >= MAX_TXS) chainBlock();
 
     return true;

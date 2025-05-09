@@ -6,7 +6,6 @@
 #include "ReplicaCompression.h"
 
 //#define MODE_BURNT (0) // MODE_BURNT (0/1) -> 0 is the case of delete replica, 1 is the case of invalid interval.
-#define MODE_REPLICA_COMPRESSION
 
 bool partial_contractTx(Tx *tx, const char* sender_pub, const char *sender_priv, const char *receiver_pub, int payment);
 bool complete_contractTx(Tx *tx, const char* sender_pub, const char *sender_priv, int collateral);

@@ -11,6 +11,8 @@
 #include <openssl/rand.h>
 #include <openssl/buffer.h>
 
+#define DEBUG {printf("DEBUG\n");exit(EXIT_FAILURE);}
+
 #ifdef _WIN32
     #include <windows.h>
 #else

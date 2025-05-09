@@ -29,7 +29,8 @@ int PoRep_Replicate(int id, char** tauD, char* data, int data_len, const unsigne
 // PoRep.Poll(N) -> [challenge]r = (r1, ... ,rl)
 void PoRep_Poll(int N, int *challenge) {
     OutputRef utxos[MAX_UTXO];
-    int utxo_count = unspentOutput(utxos, "contractVal");
+    char *validator_addr = read_file("./pem/validator_address.hex"); // processed free
+    int utxo_count = unspentOutput(utxos, validator_addr);
     if(utxo_count == 0) {
         printf("There are no UTXOs!\n");
         printLedger();
@@ -46,6 +47,7 @@ void PoRep_Poll(int N, int *challenge) {
         calcHash((unsigned char*)utxos_txid, strlen(utxos_txid), bin_utxo_hash);
         challenge[i] = ((bin_utxo_hash[1] << 16) | (bin_utxo_hash[2] << 8) | bin_utxo_hash[3]) % N;
     }
+    free(validator_addr);
 }
 
 // PoRep.Prove(R,N,id,r) -> [proof]pi

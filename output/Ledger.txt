@@ -1,107 +1,190 @@
-* TxID:
-4e7dcf3fa6a3693f1e5c0092366719291f389ec6b78e6bc7e312a7f1cf5b94b8
-* Output 1:
-Address:
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0dYVOUmKjvxQqYAsPUL4K9VjHFQ0
-stG6Wx7LCiZjYyPglqF2kkJvteRyWUoxWD7A7BgIL7ZOF6Xn9opK5WdK/Q==
------END PUBLIC KEY-----
-
-Value:1000
-
-* TxID:
-26653d2db6c14b23be7323e5d3ab2641d31c9c13d6ae39d0314579af7b5b0c13
-* Previous TxID 1:
-4e7dcf3fa6a3693f1e5c0092366719291f389ec6b78e6bc7e312a7f1cf5b94b8
-* Output 1:
-Address:
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEfOdOfGz0ZDklwlCPMWB9wF9sJtWJ
-S89Sn+8UAoD3tk3IhmpFh5H9QAt4eaT4hhe0gOguoq67OV85wt40gIaNww==
------END PUBLIC KEY-----
-
-Value:300
-* Output 2:
-Address:
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0dYVOUmKjvxQqYAsPUL4K9VjHFQ0
-stG6Wx7LCiZjYyPglqF2kkJvteRyWUoxWD7A7BgIL7ZOF6Xn9opK5WdK/Q==
------END PUBLIC KEY-----
-
-Value:700
-
-* TxID:
-ab176e77d1325d4cbdfe6d9564984ae5ce64ed5507bac189b8db766846e01bc1
-* Previous TxID 1:
-26653d2db6c14b23be7323e5d3ab2641d31c9c13d6ae39d0314579af7b5b0c13
-* Previous TxID 2:
-26653d2db6c14b23be7323e5d3ab2641d31c9c13d6ae39d0314579af7b5b0c13
-* Output 1:
-Address:
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEfOdOfGz0ZDklwlCPMWB9wF9sJtWJ
-S89Sn+8UAoD3tk3IhmpFh5H9QAt4eaT4hhe0gOguoq67OV85wt40gIaNww==
------END PUBLIC KEY-----
-
-Value:200
-* Output 2:
-Address:
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0dYVOUmKjvxQqYAsPUL4K9VjHFQ0
-stG6Wx7LCiZjYyPglqF2kkJvteRyWUoxWD7A7BgIL7ZOF6Xn9opK5WdK/Q==
------END PUBLIC KEY-----
-
-Value:500
-* Output 3:
-Address:
-422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
-Value:100
-* Output 4:
-Address:
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEfOdOfGz0ZDklwlCPMWB9wF9sJtWJ
-S89Sn+8UAoD3tk3IhmpFh5H9QAt4eaT4hhe0gOguoq67OV85wt40gIaNww==
------END PUBLIC KEY-----
-
-Value:200
-
-* TxID:
-30c0370979a38e012e17aa82341a6674ed7eb50483d6e3a86f4eb98cf30d663b
-* Previous TxID 1:
-ab176e77d1325d4cbdfe6d9564984ae5ce64ed5507bac189b8db766846e01bc1
-* Output 1:
-Address:
-422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
-Value:100
-
-* TxID:
-4532c5fe58a63c24ef4c95ef85cae3b08ebf62e640a770953a1f34e2e0487c1d
-* Previous TxID 1:
-30c0370979a38e012e17aa82341a6674ed7eb50483d6e3a86f4eb98cf30d663b
-* Output 1:
-Address:
-422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
-Value:100
-
-* TxID:
-251a651c8b3ffff52b589851b390624dc0cd4c6d99443a52e6bb7f92049a07ea
-* Previous TxID 1:
-4532c5fe58a63c24ef4c95ef85cae3b08ebf62e640a770953a1f34e2e0487c1d
-* Output 1:
-Address:
-422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
-Value:100
-
-* TxID:
-957b246fb31491dc876fe9bd62ebdd92c0408fe464d1bb9b6ac3b3f13afa3da3
-* Previous TxID 1:
-251a651c8b3ffff52b589851b390624dc0cd4c6d99443a52e6bb7f92049a07ea
-* Output 1:
-Address:
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEfOdOfGz0ZDklwlCPMWB9wF9sJtWJ
-S89Sn+8UAoD3tk3IhmpFh5H9QAt4eaT4hhe0gOguoq67OV85wt40gIaNww==
------END PUBLIC KEY-----
-
-Value:100
-
++-------
+| TxID:4e7dcf3fa6a3693f1e5c0092366719291f389ec6b78e6bc7e312a7f1cf5b94b8
+| This is a genesis Tx.
+| Output1:
+|    Address:
+|    -----BEGIN PUBLIC KEY-----
+|    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5n+pCtiQyxh++PllWCj9wQhJjrc5
+|    d1coj7Ek3Zd3gTT/UTp6yywr3T+GaPgGbhIgSps0PKRFjLKO34fvE1A9SA==
+|    -----END PUBLIC KEY-----
+|    Value:1000
++-------
++-------
+| TxID:26653d2db6c14b23be7323e5d3ab2641d31c9c13d6ae39d0314579af7b5b0c13
+| Previous TxID 1:4e7dcf3fa6a3693f1e5c0092366719291f389ec6b78e6bc7e312a7f1cf5b94b8
+| Output1:
+|    Address:
+|    -----BEGIN PUBLIC KEY-----
+|    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEiIxea8TKX3U4QnxZIYbZtrmxNynF
+|    6SSbllgeInJqshQammoVF4e0U3GjdSDBfmXCcQVhJRHDEtrcK2bQ4G4sBg==
+|    -----END PUBLIC KEY-----
+|    Value:300
+| Output2:
+|    Address:
+|    -----BEGIN PUBLIC KEY-----
+|    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5n+pCtiQyxh++PllWCj9wQhJjrc5
+|    d1coj7Ek3Zd3gTT/UTp6yywr3T+GaPgGbhIgSps0PKRFjLKO34fvE1A9SA==
+|    -----END PUBLIC KEY-----
+|    Value:700
++-------
++-------
+| TxID:ab176e77d1325d4cbdfe6d9564984ae5ce64ed5507bac189b8db766846e01bc1
+| Previous TxID 1:26653d2db6c14b23be7323e5d3ab2641d31c9c13d6ae39d0314579af7b5b0c13
+| Previous TxID 2:26653d2db6c14b23be7323e5d3ab2641d31c9c13d6ae39d0314579af7b5b0c13
+| Output1:
+|    Address:
+|    -----BEGIN PUBLIC KEY-----
+|    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEiIxea8TKX3U4QnxZIYbZtrmxNynF
+|    6SSbllgeInJqshQammoVF4e0U3GjdSDBfmXCcQVhJRHDEtrcK2bQ4G4sBg==
+|    -----END PUBLIC KEY-----
+|    Value:200
+| Output2:
+|    Address:
+|    -----BEGIN PUBLIC KEY-----
+|    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5n+pCtiQyxh++PllWCj9wQhJjrc5
+|    d1coj7Ek3Zd3gTT/UTp6yywr3T+GaPgGbhIgSps0PKRFjLKO34fvE1A9SA==
+|    -----END PUBLIC KEY-----
+|    Value:500
+| Output3:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
+| Output4:
+|    Address:
+|    -----BEGIN PUBLIC KEY-----
+|    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEiIxea8TKX3U4QnxZIYbZtrmxNynF
+|    6SSbllgeInJqshQammoVF4e0U3GjdSDBfmXCcQVhJRHDEtrcK2bQ4G4sBg==
+|    -----END PUBLIC KEY-----
+|    Value:200
++-------
++-------
+| TxID:30c0370979a38e012e17aa82341a6674ed7eb50483d6e3a86f4eb98cf30d663b
+| Previous TxID 1:ab176e77d1325d4cbdfe6d9564984ae5ce64ed5507bac189b8db766846e01bc1
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:4532c5fe58a63c24ef4c95ef85cae3b08ebf62e640a770953a1f34e2e0487c1d
+| Previous TxID 1:30c0370979a38e012e17aa82341a6674ed7eb50483d6e3a86f4eb98cf30d663b
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:251a651c8b3ffff52b589851b390624dc0cd4c6d99443a52e6bb7f92049a07ea
+| Previous TxID 1:4532c5fe58a63c24ef4c95ef85cae3b08ebf62e640a770953a1f34e2e0487c1d
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:600044870f657dd0a9eb4aee1112a9fd40bcd4543652b581ece2a9e80180d9bb
+| Previous TxID 1:251a651c8b3ffff52b589851b390624dc0cd4c6d99443a52e6bb7f92049a07ea
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:02d7dd9914b9f28af5c87177ba5c82170b55f11519b341cdc3b702f677459267
+| Previous TxID 1:600044870f657dd0a9eb4aee1112a9fd40bcd4543652b581ece2a9e80180d9bb
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:f6269d1177bb634a4851e2f342eb9f4c9d2bd97d09c6fb053c57174e971f7244
+| Previous TxID 1:02d7dd9914b9f28af5c87177ba5c82170b55f11519b341cdc3b702f677459267
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:90949134c228a20b84ed74d29cc0afefc2713c26c3fcc26dd182d9a4e5dda7b6
+| Previous TxID 1:f6269d1177bb634a4851e2f342eb9f4c9d2bd97d09c6fb053c57174e971f7244
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:a9b20e0363b326a4d9b5567f4ecc241e3fb4e735cfa4a40d456e3024673e4612
+| Previous TxID 1:90949134c228a20b84ed74d29cc0afefc2713c26c3fcc26dd182d9a4e5dda7b6
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:1d321f9daf9d345b6883b687e9df960f92b3fe8dffbc13488412a7ae877e5175
+| Previous TxID 1:a9b20e0363b326a4d9b5567f4ecc241e3fb4e735cfa4a40d456e3024673e4612
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:d46fc83277ce1eeb4520e57d7b1a229c15b27fce68e5288e4eae5aff41bedb35
+| Previous TxID 1:1d321f9daf9d345b6883b687e9df960f92b3fe8dffbc13488412a7ae877e5175
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:3968b0218d0e4ce25433034ec8ff0853d579afb6faff4f67f70ed0c9e5e67f89
+| Previous TxID 1:d46fc83277ce1eeb4520e57d7b1a229c15b27fce68e5288e4eae5aff41bedb35
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:fa031096b140374e39dcb156a73fad7c512dade66a2fda66e3faedc0afdddeb2
+| Previous TxID 1:3968b0218d0e4ce25433034ec8ff0853d579afb6faff4f67f70ed0c9e5e67f89
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:2c8ab9fc683bdbe18b8bc09011e1a107b08b086b14190e91172f62498d360dfc
+| Previous TxID 1:fa031096b140374e39dcb156a73fad7c512dade66a2fda66e3faedc0afdddeb2
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:fea2f071c4113171ccf3cb81f9926c757e6d5379903b8dda158980c9e7e801f5
+| Previous TxID 1:2c8ab9fc683bdbe18b8bc09011e1a107b08b086b14190e91172f62498d360dfc
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:6ef9813a94c92b93548b223599df0f46da99de6ccce72a820557cfc872555787
+| Previous TxID 1:fea2f071c4113171ccf3cb81f9926c757e6d5379903b8dda158980c9e7e801f5
+| Output1:
+|    Address:
+|    422c9ec30063cdd99763d875fc8559dac616b065d041f3aac26d66ba017620b0
+|    Value:100
++-------
++-------
+| TxID:a51ad3e5e15ca14ca58387021a5e020b038b1cdbf880a34a4d1c84baae03ae07
+| Previous TxID 1:6ef9813a94c92b93548b223599df0f46da99de6ccce72a820557cfc872555787
+| Output1:
+|    Address:
+|    -----BEGIN PUBLIC KEY-----
+|    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEiIxea8TKX3U4QnxZIYbZtrmxNynF
+|    6SSbllgeInJqshQammoVF4e0U3GjdSDBfmXCcQVhJRHDEtrcK2bQ4G4sBg==
+|    -----END PUBLIC KEY-----
+|    Value:100
++-------
